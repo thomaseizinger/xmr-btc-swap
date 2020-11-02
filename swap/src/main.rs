@@ -18,6 +18,7 @@ use libp2p::Multiaddr;
 use log::LevelFilter;
 use std::{io, io::Write, process, sync::Arc};
 use structopt::StructOpt;
+use tempfile::tempdir;
 use tracing::info;
 use url::Url;
 
@@ -25,7 +26,11 @@ mod cli;
 mod trace;
 
 use cli::Options;
-use swap::{alice, bitcoin, bob, monero, Cmd, Rsp, SwapAmounts};
+use swap::{
+    alice, bitcoin, bob, monero,
+    storage::{self, Database},
+    Cmd, Rsp, SwapAmounts,
+};
 
 // TODO: Add root seed file instead of generating new seed each run.
 
@@ -62,6 +67,9 @@ async fn main() -> Result<()> {
 
     let alice: Multiaddr = addr.parse().expect("failed to parse Alice's address");
 
+    // TODO: Save the database to a known location
+    let db_dir = tempdir().unwrap();
+
     if opt.as_alice {
         info!("running swap node as Alice ...");
 
@@ -77,7 +85,9 @@ async fn main() -> Result<()> {
 
         let monero_wallet = Arc::new(monero::Wallet::localhost(MONERO_WALLET_RPC_PORT));
 
-        swap_as_alice(bitcoin_wallet, monero_wallet, alice.clone()).await?;
+        let db = Database::open(db_dir.path()).unwrap();
+
+        swap_as_alice(bitcoin_wallet, monero_wallet, db, alice.clone()).await?;
     } else {
         info!("running swap node as Bob ...");
 
@@ -95,12 +105,14 @@ async fn main() -> Result<()> {
 
         let monero_wallet = Arc::new(monero::Wallet::localhost(MONERO_WALLET_RPC_PORT));
 
+        let db = Database::open(db_dir.path()).unwrap();
+
         match (opt.piconeros, opt.satoshis) {
             (Some(_), Some(_)) => bail!("Please supply only a single amount to swap"),
             (None, None) => bail!("Please supply an amount to swap"),
             (Some(_picos), _) => todo!("support starting with picos"),
             (None, Some(sats)) => {
-                swap_as_bob(bitcoin_wallet, monero_wallet, sats, alice).await?;
+                swap_as_bob(bitcoin_wallet, monero_wallet, db, sats, alice).await?;
             }
         };
     }
@@ -129,21 +141,23 @@ async fn create_tor_service(
 async fn swap_as_alice(
     bitcoin_wallet: Arc<swap::bitcoin::Wallet>,
     monero_wallet: Arc<swap::monero::Wallet>,
+    db: Database<storage::Alice>,
     addr: Multiaddr,
 ) -> Result<()> {
     #[cfg(not(feature = "tor"))]
     {
-        alice::swap(bitcoin_wallet, monero_wallet, addr, None).await
+        alice::swap(bitcoin_wallet, monero_wallet, db, addr, None).await
     }
     #[cfg(feature = "tor")]
     {
-        alice::swap(bitcoin_wallet, monero_wallet, addr, Some(PORT)).await
+        alice::swap(bitcoin_wallet, monero_wallet, db, addr, Some(PORT)).await
     }
 }
 
 async fn swap_as_bob(
     bitcoin_wallet: Arc<swap::bitcoin::Wallet>,
     monero_wallet: Arc<swap::monero::Wallet>,
+    db: Database<storage::Bob>,
     sats: u64,
     alice: Multiaddr,
 ) -> Result<()> {
@@ -152,6 +166,7 @@ async fn swap_as_bob(
     tokio::spawn(bob::swap(
         bitcoin_wallet,
         monero_wallet,
+        db,
         sats,
         alice,
         cmd_tx,

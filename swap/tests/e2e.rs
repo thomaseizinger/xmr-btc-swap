@@ -54,8 +54,8 @@ mod e2e_test {
         let (monero, _container) = Monero::new(&cli).unwrap();
         monero.init(xmr_alice, xmr_bob).await.unwrap();
 
-        let alice_xmr_wallet = Arc::new(swap::monero::Wallet(monero.alice_wallet_rpc_client()));
-        let bob_xmr_wallet = Arc::new(swap::monero::Wallet(monero.bob_wallet_rpc_client()));
+        let alice_xmr_wallet = Arc::new(monero::Wallet(monero.alice_wallet_rpc_client()));
+        let bob_xmr_wallet = Arc::new(monero::Wallet(monero.bob_wallet_rpc_client()));
 
         let alice_swap = alice::swap(
             alice_btc_wallet.clone(),
