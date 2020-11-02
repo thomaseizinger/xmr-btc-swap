@@ -5,7 +5,8 @@ mod e2e_test {
     use libp2p::Multiaddr;
     use monero_harness::Monero;
     use std::sync::Arc;
-    use swap::{alice, bob};
+    use swap::{alice, bob, monero, storage::Database};
+    use tempfile::tempdir;
     use testcontainers::clients::Cli;
     use tracing_subscriber::util::SubscriberInitExt;
 
@@ -16,7 +17,7 @@ mod e2e_test {
             "swap=debug,xmr_btc=debug,hyper=off,reqwest=off,monero_harness=info,testcontainers=info,libp2p=debug",
         )
         .with_ansi(false)
-        .set_default();
+            .set_default();
 
         let alice_multiaddr: Multiaddr = "/ip4/127.0.0.1/tcp/9876"
             .parse()
@@ -57,18 +58,24 @@ mod e2e_test {
         let alice_xmr_wallet = Arc::new(monero::Wallet(monero.alice_wallet_rpc_client()));
         let bob_xmr_wallet = Arc::new(monero::Wallet(monero.bob_wallet_rpc_client()));
 
+        let db_dir = tempdir().unwrap();
+        let db = Database::open(db_dir.path()).unwrap();
         let alice_swap = alice::swap(
             alice_btc_wallet.clone(),
             alice_xmr_wallet.clone(),
+            db,
             alice_multiaddr.clone(),
             None,
         );
 
+        let db_dir = tempdir().unwrap();
+        let db = Database::open(db_dir.path()).unwrap();
         let (cmd_tx, mut _cmd_rx) = mpsc::channel(1);
         let (mut rsp_tx, rsp_rx) = mpsc::channel(1);
         let bob_swap = bob::swap(
             bob_btc_wallet.clone(),
             bob_xmr_wallet.clone(),
+            db,
             btc.as_sat(),
             alice_multiaddr,
             cmd_tx,
