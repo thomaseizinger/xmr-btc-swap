@@ -18,7 +18,6 @@ mod tests {
     use rand::rngs::OsRng;
     use std::convert::TryInto;
     use testcontainers::clients::Cli;
-    use tracing_subscriber::util::SubscriberInitExt;
     use xmr_btc::{
         alice, bitcoin,
         bitcoin::{Amount, TX_FEE},
@@ -27,10 +26,6 @@ mod tests {
 
     #[tokio::test]
     async fn happy_path() {
-        let _guard = tracing_subscriber::fmt()
-            .with_env_filter("info")
-            .set_default();
-
         let cli = Cli::default();
         let (monero, _container) = Monero::new(&cli).unwrap();
         let bitcoind = init_bitcoind(&cli).await;
@@ -101,10 +96,6 @@ mod tests {
 
     #[tokio::test]
     async fn both_refund() {
-        let _guard = tracing_subscriber::fmt()
-            .with_env_filter("info")
-            .set_default();
-
         let cli = Cli::default();
         let (monero, _container) = Monero::new(&cli).unwrap();
         let bitcoind = init_bitcoind(&cli).await;
@@ -177,10 +168,6 @@ mod tests {
 
     #[tokio::test]
     async fn alice_punishes() {
-        let _guard = tracing_subscriber::fmt()
-            .with_env_filter("info")
-            .set_default();
-
         let cli = Cli::default();
         let (monero, _container) = Monero::new(&cli).unwrap();
         let bitcoind = init_bitcoind(&cli).await;

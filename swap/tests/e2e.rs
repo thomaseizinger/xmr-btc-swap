@@ -8,17 +8,9 @@ mod e2e_test {
     use swap::{alice, bob, monero, storage::Database};
     use tempfile::tempdir;
     use testcontainers::clients::Cli;
-    use tracing_subscriber::util::SubscriberInitExt;
 
     #[tokio::test]
     async fn swap() {
-        let _guard = tracing_subscriber::fmt()
-        .with_env_filter(
-            "swap=debug,xmr_btc=debug,hyper=off,reqwest=off,monero_harness=info,testcontainers=info,libp2p=debug",
-        )
-        .with_ansi(false)
-            .set_default();
-
         let alice_multiaddr: Multiaddr = "/ip4/127.0.0.1/tcp/9876"
             .parse()
             .expect("failed to parse Alice's address");
