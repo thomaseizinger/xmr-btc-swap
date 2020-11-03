@@ -29,7 +29,8 @@ use crate::{
         peer_tracker::{self, PeerTracker},
         transport, TokioExecutor,
     },
-    storage::{self, Database},
+    state,
+    storage::Database,
     Cmd, Rsp, SwapAmounts, PUNISH_TIMELOCK, REFUND_TIMELOCK,
 };
 use xmr_btc::{
@@ -140,7 +141,7 @@ pub async fn swap(
     };
 
     let swap_id = Uuid::new_v4();
-    db.insert_latest_state(swap_id, storage::Bob::Handshaken(state2.clone()).into())
+    db.insert_latest_state(swap_id, state::Bob::Handshaken(state2.clone()).into())
         .await?;
 
     swarm.send_message2(alice.clone(), state2.next_message());
@@ -168,11 +169,11 @@ pub async fn swap(
                 let _ = bitcoin_wallet
                     .broadcast_signed_transaction(signed_tx_lock)
                     .await?;
-                db.insert_latest_state(swap_id, storage::Bob::BtcLocked(state2.clone()).into())
+                db.insert_latest_state(swap_id, state::Bob::BtcLocked(state2.clone()).into())
                     .await?;
             }
             GeneratorState::Yielded(bob::Action::SendBtcRedeemEncsig(tx_redeem_encsig)) => {
-                db.insert_latest_state(swap_id, storage::Bob::XmrLocked(state2.clone()).into())
+                db.insert_latest_state(swap_id, state::Bob::XmrLocked(state2.clone()).into())
                     .await?;
 
                 let mut guard = network.as_ref().lock().await;
@@ -192,7 +193,7 @@ pub async fn swap(
                 spend_key,
                 view_key,
             }) => {
-                db.insert_latest_state(swap_id, storage::Bob::BtcRedeemed(state2.clone()).into())
+                db.insert_latest_state(swap_id, state::Bob::BtcRedeemed(state2.clone()).into())
                     .await?;
 
                 monero_wallet
@@ -200,7 +201,7 @@ pub async fn swap(
                     .await?;
             }
             GeneratorState::Yielded(bob::Action::CancelBtc(tx_cancel)) => {
-                db.insert_latest_state(swap_id, storage::Bob::BtcRefundable(state2.clone()).into())
+                db.insert_latest_state(swap_id, state::Bob::BtcRefundable(state2.clone()).into())
                     .await?;
 
                 let _ = bitcoin_wallet
@@ -208,7 +209,7 @@ pub async fn swap(
                     .await?;
             }
             GeneratorState::Yielded(bob::Action::RefundBtc(tx_refund)) => {
-                db.insert_latest_state(swap_id, storage::Bob::BtcRefundable(state2.clone()).into())
+                db.insert_latest_state(swap_id, state::Bob::BtcRefundable(state2.clone()).into())
                     .await?;
 
                 let _ = bitcoin_wallet
@@ -216,7 +217,7 @@ pub async fn swap(
                     .await?;
             }
             GeneratorState::Complete(()) => {
-                db.insert_latest_state(swap_id, storage::Bob::SwapComplete.into())
+                db.insert_latest_state(swap_id, state::Bob::SwapComplete.into())
                     .await?;
 
                 return Ok(());
