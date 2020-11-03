@@ -26,11 +26,7 @@ mod cli;
 mod trace;
 
 use cli::Options;
-use swap::{
-    alice, bitcoin, bob, monero,
-    storage::{self, Database},
-    Cmd, Rsp, SwapAmounts,
-};
+use swap::{alice, bitcoin, bob, monero, storage::Database, Cmd, Rsp, SwapAmounts};
 
 // TODO: Add root seed file instead of generating new seed each run.
 
@@ -141,7 +137,7 @@ async fn create_tor_service(
 async fn swap_as_alice(
     bitcoin_wallet: Arc<swap::bitcoin::Wallet>,
     monero_wallet: Arc<swap::monero::Wallet>,
-    db: Database<storage::Alice>,
+    db: Database,
     addr: Multiaddr,
 ) -> Result<()> {
     #[cfg(not(feature = "tor"))]
@@ -157,7 +153,7 @@ async fn swap_as_alice(
 async fn swap_as_bob(
     bitcoin_wallet: Arc<swap::bitcoin::Wallet>,
     monero_wallet: Arc<swap::monero::Wallet>,
-    db: Database<storage::Bob>,
+    db: Database,
     sats: u64,
     alice: Multiaddr,
 ) -> Result<()> {
