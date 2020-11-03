@@ -16,11 +16,14 @@ use anyhow::{bail, Context, Result};
 use futures::{channel::mpsc, StreamExt};
 use libp2p::Multiaddr;
 use log::LevelFilter;
+use prettytable::{row, Table};
 use std::{io, io::Write, process, sync::Arc};
 use structopt::StructOpt;
-use tempfile::tempdir;
 use tracing::info;
 use url::Url;
+
+#[macro_use]
+extern crate prettytable;
 
 mod cli;
 mod trace;
@@ -46,6 +49,23 @@ async fn main() -> Result<()> {
 
     trace::init_tracing(LevelFilter::Debug)?;
 
+    // TODO: Save the database to a known location
+    let db = Database::open(std::path::Path::new("/home/luckysori/test/xmr_btc_swap")).unwrap();
+
+    if opt.history {
+        let swaps = db.all()?;
+
+        let mut table = Table::new();
+        table.add_row(row!("SWAP ID", "STATE"));
+
+        for (swap_id, swap) in swaps.iter() {
+            table.add_row(row!(swap_id, swap.clone()));
+        }
+
+        table.printstd();
+        process::exit(0);
+    }
+
     #[cfg(feature = "tor")]
     let (addr, _ac) = {
         let tor_secret_key = torut::onion::TorSecretKeyV3::generate();
@@ -63,9 +83,6 @@ async fn main() -> Result<()> {
 
     let alice: Multiaddr = addr.parse().expect("failed to parse Alice's address");
 
-    // TODO: Save the database to a known location
-    let db_dir = tempdir().unwrap();
-
     if opt.as_alice {
         info!("running swap node as Alice ...");
 
@@ -80,8 +97,6 @@ async fn main() -> Result<()> {
         let bitcoin_wallet = Arc::new(bitcoin_wallet);
 
         let monero_wallet = Arc::new(monero::Wallet::localhost(MONERO_WALLET_RPC_PORT));
-
-        let db = Database::open(db_dir.path()).unwrap();
 
         swap_as_alice(bitcoin_wallet, monero_wallet, db, alice.clone()).await?;
     } else {
@@ -100,8 +115,6 @@ async fn main() -> Result<()> {
         let bitcoin_wallet = Arc::new(bitcoin_wallet);
 
         let monero_wallet = Arc::new(monero::Wallet::localhost(MONERO_WALLET_RPC_PORT));
-
-        let db = Database::open(db_dir.path()).unwrap();
 
         match (opt.piconeros, opt.satoshis) {
             (Some(_), Some(_)) => bail!("Please supply only a single amount to swap"),

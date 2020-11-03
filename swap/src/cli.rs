@@ -1,5 +1,8 @@
 #[derive(structopt::StructOpt, Debug)]
 pub struct Options {
+    #[structopt(long = "history")]
+    pub history: bool,
+
     /// Run the swap as Alice.
     #[structopt(long = "as-alice")]
     pub as_alice: bool,
