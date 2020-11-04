@@ -45,7 +45,8 @@ async fn main() -> Result<()> {
     match opt {
         Options::Alice {
             bitcoind_url,
-            monerod_url,
+            monero_wallet_rpc_url,
+            monero_watch_only_wallet_rpc_url,
             listen_addr,
             tor_port,
         } => {
@@ -78,7 +79,10 @@ async fn main() -> Result<()> {
                 .expect("failed to create bitcoin wallet");
             let bitcoin_wallet = Arc::new(bitcoin_wallet);
 
-            let monero_wallet = Arc::new(monero::Wallet::new(monerod_url));
+            let monero_wallet = Arc::new(monero::Facade::new(
+                monero_wallet_rpc_url,
+                monero_watch_only_wallet_rpc_url,
+            ));
 
             swap_as_alice(
                 bitcoin_wallet,
@@ -93,7 +97,8 @@ async fn main() -> Result<()> {
             alice_addr,
             satoshis,
             bitcoind_url,
-            monerod_url,
+            monero_wallet_rpc_url,
+            monero_watch_only_wallet_rpc_url,
             tor,
         } => {
             info!("running swap node as Bob ...");
@@ -111,7 +116,10 @@ async fn main() -> Result<()> {
                 .expect("failed to create bitcoin wallet");
             let bitcoin_wallet = Arc::new(bitcoin_wallet);
 
-            let monero_wallet = Arc::new(monero::Wallet::new(monerod_url));
+            let monero_wallet = Arc::new(monero::Facade::new(
+                monero_wallet_rpc_url,
+                monero_watch_only_wallet_rpc_url,
+            ));
 
             swap_as_bob(
                 bitcoin_wallet,
@@ -148,7 +156,7 @@ async fn create_tor_service(
 
 async fn swap_as_alice(
     bitcoin_wallet: Arc<swap::bitcoin::Wallet>,
-    monero_wallet: Arc<swap::monero::Wallet>,
+    monero_wallet: Arc<swap::monero::Facade>,
     addr: Multiaddr,
     transport: SwapTransport,
     behaviour: Alice,
@@ -158,7 +166,7 @@ async fn swap_as_alice(
 
 async fn swap_as_bob(
     bitcoin_wallet: Arc<swap::bitcoin::Wallet>,
-    monero_wallet: Arc<swap::monero::Wallet>,
+    monero_wallet: Arc<swap::monero::Facade>,
     sats: u64,
     alice: Multiaddr,
     transport: SwapTransport,
