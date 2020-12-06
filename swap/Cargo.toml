@@ -13,7 +13,7 @@ atty = "0.2"
 backoff = { version = "0.2", features = ["tokio"] }
 base64 = "0.12"
 bitcoin = { version = "0.25", features = ["rand", "use-serde"] }
-bitcoin-harness = "0.2"
+bitcoin-harness = { git = "https://github.com/coblox/bitcoin-harness-rs", rev = "252758b21afd3d1695e95f277ca29c798019e69a" }
 conquer-once = "0.3"
 derivative = "2"
 ecdsa_fun = { git = "https://github.com/LLFourn/secp256kfun", rev = "cdfbc766045ea678a41780919d6228dd5acee3be", features = ["libsecp_compat", "serde"] }
