@@ -5,6 +5,29 @@ on:
     types: [created]
 
 jobs:
+  attach_changelog:
+    name: Attach changelog to release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tagged commit
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.release.target_commitish }}
+          token: ${{ secrets.BOTTY_GITHUB_TOKEN }}
+
+      - name: Extract changelog section for release
+        id: changelog
+        uses: coditory/changelog-parser@v1
+        with:
+          version: ${{ github.event.release.tag_name }}
+
+      - name: Update release with changelog
+        uses: tubone24/update_release@v1.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.BOTTY_GITHUB_TOKEN }}
+        with:
+          body: ${{ steps.changelog.outputs.description }}
+
   release:
     name: Release swap
     strategy:
@@ -45,19 +68,6 @@ jobs:
         with:
           ref: ${{ github.event.release.target_commitish }}
           token: ${{ secrets.BOTTY_GITHUB_TOKEN }}
-
-      - name: Extract changelog section for release
-        id: changelog
-        uses: coditory/changelog-parser@v1
-        with:
-          version: ${{ github.event.release.tag_name }}
-
-      - name: Update release with changelog
-        uses: tubone24/update_release@v1.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.BOTTY_GITHUB_TOKEN }}
-        with:
-          body: ${{ steps.changelog.outputs.description }}
 
       - uses: Swatinem/rust-cache@v1.2.0
 
