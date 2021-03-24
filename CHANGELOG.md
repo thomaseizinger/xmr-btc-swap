@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Some unnecessary changes.
 
-## [v0.4]
+## [0.4.0]
 
 ### Added
 
 - A changelog file.
 
-[unreleased]: https://github.com/comit-network/xmr-btc-swap/compare/v0.4...HEAD
-[v0.4]: https://github.com/comit-network/xmr-btc-swap/compare/v0.3...v0.4
+[unreleased]: https://github.com/comit-network/xmr-btc-swap/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/comit-network/xmr-btc-swap/compare/v0.3...0.4.0
