@@ -2,8 +2,6 @@ name: "Create release"
 
 on:
   pull_request:
-    branches:
-      - release/*
     types:
       - closed
 
