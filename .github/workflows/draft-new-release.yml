@@ -46,7 +46,7 @@ jobs:
         id: make-commit
         run: |
           curl -fsSL https://dprint.dev/install.sh | sh
-          dprint fmt
+          /home/runner/.dprint/bin/dprint fmt
 
           git add CHANGELOG.md Cargo.lock
           git commit --message "Prepare release ${{ github.event.inputs.version }}"
