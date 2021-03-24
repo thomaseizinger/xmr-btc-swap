@@ -17,7 +17,7 @@ jobs:
         id: extract-version
         shell: python
         run: |
-          branch_name = ${{ github.event.pull_request.head.ref }}
+          branch_name = "${{ github.event.pull_request.head.ref }}"
           version = branch_name.split("/")[1]
 
           print(f"::set-output name=version::{version}")
