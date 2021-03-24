@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2021-03-24
+
 ### Added
 
 - A changelog file.
 
-[unreleased]: https://github.com/comit-network/xmr-btc-swap/compare/v0.3...HEAD
+[Unreleased]: https://github.com/thomaseizinger/xmr-btc-swap/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/thomaseizinger/xmr-btc-swap/compare/3d4f3ec9920db757d8333fa49bf30b4f534cef29...0.4.0
