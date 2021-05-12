@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
 
       - uses: Swatinem/rust-cache@v1.2.0
         id: cache
@@ -56,7 +56,7 @@ jobs:
     steps:
 
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
 
       - uses: Swatinem/rust-cache@v1.2.0
 
@@ -96,7 +96,7 @@ jobs:
     steps:
 
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
 
       - uses: Swatinem/rust-cache@v1.2.0
 
@@ -127,7 +127,7 @@ jobs:
     steps:
 
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v2.3.4
 
       - uses: Swatinem/rust-cache@v1.2.0
 
